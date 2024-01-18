@@ -6,3 +6,7 @@ Ben has a paper
 [Art of Code](https://natureofcode.com/fractals/)
 
 [University of Hamburg](https://www1.biologie.uni-hamburg.de/b-online/e28_3/lsys.html#:~:text=L%2Dsystems%20are%20a%20mathematical,%3B%20Prusinkiewicz%20and%20Lindenmayer%201991)%20.)
+
+[Paul Bourke](https://paulbourke.net/fractals/lsys/)
+
+Przemyslaw Prusinkiewcz's name comes up A LOT in research
