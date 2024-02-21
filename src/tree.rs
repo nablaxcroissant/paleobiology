@@ -3,6 +3,7 @@ use draw3d::app::App;
 use draw3d::vertex::Vertex;
 use glam::f32::{Vec3, Quat};
 use std::f32::consts::PI;
+use rand::prelude::*;
 
 enum Command{
     DrawForward,    // Draw forward
@@ -14,7 +15,6 @@ enum Command{
 }
 
 pub struct Tree{
-    pub gen_string: String, // L-system descriptor of the tree in its current state
     p1: f32,
     p2: f32,
     phi1: f32,
@@ -32,9 +32,7 @@ impl Tree{
         gam1: f32,
         gam2: f32
     ) -> Tree {
-        let start_string = String::from("X");
         Tree {
-            gen_string: start_string,
             p1,
             p2,
             phi1,
@@ -43,95 +41,43 @@ impl Tree{
             gam2,
         }
     }
-
-    pub fn iterate(&mut self) {
-        let mut new = self.gen_string.clone();
-        let mut count = 0;
-        for (i, c) in self.gen_string.chars().enumerate(){
-            match c {
-                'A' => {
-                    new.insert_str(i+count, "[wxA]yzB");
-                    count += 8;
-                }
-                'B' => {
-                    new.insert_str(i+count, "[wxA]yzB");
-                    count += 8;
-                }
-                'F' => {
-                    new.replace_range(i+count..i+count+1, "FF");
-                    count += 1;
-                }
-                'X' => {
-                    new.replace_range(i+count..i+count+1, "F[wX]F[yX]wX");
-                    count += 11;
-                }
-                _ => ()
-            }
-        }
-        self.gen_string = new;
-    }
 }
 
 impl Draw for Tree {
     fn draw(&self, app: &App) -> Geometry {
-        //TODO: Parse gen string into commands
         let mut turtle_stack: Vec<Turtle> = Vec::new();
-        let mut index_stack = Vec::new();
+        let mut index_stack: Vec<u16> = Vec::new();
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
 
         let mut turtle = Turtle::new();
         let mut index: u16 = 0;
-                    
-        for char in self.gen_string.chars() {
-            match char {
-                'A' => {
-                    vertices.push(turtle.position_as_vertex());
-                    indices.push(index);
-                    index = vertices.len() as u16;
-                    turtle.forward(0.2);
-                    vertices.push(turtle.position_as_vertex());
-                    indices.push(index);
-                    index += 1;
-                },
-                'B' => {
-                    vertices.push(turtle.position_as_vertex());
-                    indices.push(index);
-                    index = vertices.len() as u16;
-                    turtle.forward(0.2);
-                    vertices.push(turtle.position_as_vertex());
-                    indices.push(index);
-                    index += 1;
-                },
-                'F' => {
-                    vertices.push(turtle.position_as_vertex());
-                    indices.push(index);
-                    index = vertices.len() as u16;
-                    turtle.forward(0.004);
-                    vertices.push(turtle.position_as_vertex());
-                    indices.push(index);
-                    index += 1;
-                }
-                '[' => {
-                    turtle_stack.push(turtle.clone());
-                    index_stack.push(index.clone());
-                }
-                ']' => {
-                    turtle = turtle_stack.pop().unwrap();
-                    index = index_stack.pop().unwrap();
-                }
-                'w' => {
-                    turtle.rot_z(0.4);
-                }
-                'y' => {
-                    turtle.rot_z(-0.4);
-                }
-                _ => {}
+
+        let mut rng = rand::thread_rng();
+
+        vertices.push(turtle.position_as_vertex());
+        indices.push(index);
+        turtle.forward(0.01);
+        index += 1;
+        vertices.push(turtle.position_as_vertex());
+        indices.push(index);
+        turtle_stack.push(turtle.clone());
+        index_stack.push(index);
+
+        for i in 0..10{
+            vertices.push(turtle.position_as_vertex());
+            indices.push(index);
+            turtle.forward(0.01);
+            index += 1;
+            vertices.push(turtle.position_as_vertex());
+            indices.push(index);
+
+            if rng.gen() < self.p1 {
+                turtle_stack.push(turtle.clone());
+                index_stack.push(index);
             }
         }
-
-        //TODO: Run commands
 
         Geometry::new_line(app, &vertices, &indices)
     }

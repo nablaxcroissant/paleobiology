@@ -16,12 +16,7 @@ struct Model {
 }
 
 fn model(_app: &App) -> Model {
-    let mut tree = Tree::new(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    //println!("{:?}", tree.gen_string);
-    for _ in 0..8{
-        tree.iterate();
-        //println!("{:?}", tree.gen_string);
-    }
+    let tree = Tree::new(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     
     Model {
         tree
